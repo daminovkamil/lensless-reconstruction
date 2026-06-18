@@ -1,7 +1,9 @@
 import os
+from pathlib import Path
 
 import numpy as np
-from huggingface_hub import hf_hub_download
+import torch
+from huggingface_hub import hf_hub_download, snapshot_download
 
 from datasets import load_dataset
 from lensless_helpers.psf import simulate_psf_from_mask
@@ -21,6 +23,8 @@ class DigiCamDataset(BaseDataset):
         self.repo_id = repo_id
         self.hf_token = self._get_hf_token()
         self.hf_dataset = load_dataset(repo_id, split=split, token=self.hf_token)
+        self.mask_dir = self._download_masks()
+        self.psf_cache_dir = self._get_psf_cache_dir()
         self._psf_cache = {}
 
         mask_labels = self.hf_dataset["mask_label"]
@@ -46,15 +50,33 @@ class DigiCamDataset(BaseDataset):
 
     def _get_psf(self, mask_label):
         if mask_label not in self._psf_cache:
-            mask_path = hf_hub_download(
-                self.repo_id,
-                f"masks/mask_{mask_label}.npy",
-                repo_type="dataset",
-                token=self.hf_token,
-            )
-            psf = simulate_psf_from_mask(np.load(mask_path))
-            self._psf_cache[mask_label] = psf[0].float()
+            cache_path = self.psf_cache_dir / f"mask_{mask_label}.pt"
+            if cache_path.exists():
+                self._psf_cache[mask_label] = torch.load(cache_path, map_location="cpu")
+            else:
+                mask_path = self.mask_dir / f"mask_{mask_label}.npy"
+                if not mask_path.exists():
+                    mask_path = Path(
+                        hf_hub_download(
+                            self.repo_id,
+                            f"masks/mask_{mask_label}.npy",
+                            repo_type="dataset",
+                            token=self.hf_token,
+                        )
+                    )
+                psf = simulate_psf_from_mask(np.load(mask_path))[0].float()
+                self._save_psf(cache_path, psf)
+                self._psf_cache[mask_label] = psf
         return self._psf_cache[mask_label]
+
+    def _download_masks(self):
+        snapshot_dir = snapshot_download(
+            repo_id=self.repo_id,
+            repo_type="dataset",
+            allow_patterns=["masks/*"],
+            token=self.hf_token,
+        )
+        return Path(snapshot_dir) / "masks"
 
     @staticmethod
     def _get_hf_token():
@@ -63,6 +85,26 @@ class DigiCamDataset(BaseDataset):
             or os.environ.get("HUGGING_FACE_TOKEN")
             or os.environ.get("HUGGING_FACE_HUB_TOKEN")
         )
+
+    @staticmethod
+    def _get_psf_cache_dir():
+        cache_dir = Path(
+            os.environ.get(
+                "DIGICAM_PSF_CACHE_DIR",
+                Path.home() / ".cache" / "digicam_psfs",
+            )
+        )
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        return cache_dir
+
+    @staticmethod
+    def _save_psf(cache_path, psf):
+        tmp_path = cache_path.with_suffix(f".{os.getpid()}.tmp")
+        try:
+            torch.save(psf, tmp_path)
+            tmp_path.replace(cache_path)
+        except OSError:
+            tmp_path.unlink(missing_ok=True)
 
     @staticmethod
     def _assert_index_is_valid(index):
