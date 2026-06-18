@@ -86,7 +86,7 @@ class Trainer(BaseTrainer):
         if mode != "train":
             self._log_reconstructions(batch, mode)
 
-    def _log_reconstructions(self, batch, mode, examples=4):
+    def _log_reconstructions(self, batch, mode, examples=8):
         recon = crop_roi(batch["reconstructed"]).detach().cpu().clamp(0, 1)
         gt = crop_roi(batch["gt"]).detach().cpu().clamp(0, 1)
         n = min(examples, recon.shape[0])
