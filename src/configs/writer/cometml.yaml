@@ -1,5 +1,5 @@
 _target_: src.logger.CometMLWriter
-project_name: "hw5-lensless"
+project_name: "lensless-reconstruction"
 workspace: null
 run_name: "noname"
 mode: "online"
