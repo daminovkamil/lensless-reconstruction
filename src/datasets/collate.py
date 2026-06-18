@@ -1,11 +1,10 @@
 import torch
 
 
-def stack(key):
-    return torch.stack([elem[key] for elem in dataset_items]).contiguous()
-
-
 def collate_fn(dataset_items: list[dict]):
+    def stack(key):
+        return torch.stack([elem[key] for elem in dataset_items]).contiguous()
+
     result_batch = {
         "lensless": stack("lensless"),
         "psf": stack("psf"),
