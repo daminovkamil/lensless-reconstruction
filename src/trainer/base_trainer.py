@@ -303,6 +303,9 @@ class BaseTrainer:
         self.is_train = False
         self.model.eval()
         self.evaluation_metrics.reset()
+        image_log_batches = []
+        image_log_count = 0
+        image_log_limit = int(self.config.trainer.get("log_eval_images", 8))
         with torch.no_grad():
             for batch_idx, batch in tqdm(
                 enumerate(dataloader),
@@ -313,11 +316,36 @@ class BaseTrainer:
                     batch,
                     metrics=self.evaluation_metrics,
                 )
+                if (
+                    image_log_limit > image_log_count
+                    and "reconstructed" in batch
+                    and "gt" in batch
+                ):
+                    take = min(image_log_limit - image_log_count, batch["gt"].shape[0])
+                    image_log_batches.append(
+                        {
+                            "reconstructed": batch["reconstructed"][:take]
+                            .detach()
+                            .cpu(),
+                            "gt": batch["gt"][:take].detach().cpu(),
+                        }
+                    )
+                    image_log_count += take
             self.writer.set_step(epoch * self.epoch_len, part)
             self._log_scalars(self.evaluation_metrics)
-            self._log_batch(
-                batch_idx, batch, part
-            )  # log only the last batch during inference
+            if image_log_batches:
+                self._log_batch(
+                    -1,
+                    {
+                        "reconstructed": torch.cat(
+                            [item["reconstructed"] for item in image_log_batches], dim=0
+                        ),
+                        "gt": torch.cat(
+                            [item["gt"] for item in image_log_batches], dim=0
+                        ),
+                    },
+                    part,
+                )
 
         return self.evaluation_metrics.result()
 

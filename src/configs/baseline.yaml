@@ -27,6 +27,7 @@ trainer:
   resume_from: null
   device: auto
   compile: false
+  log_eval_images: 16
   override: False
   monitor: "max val_PSNR"
   save_period: 5
