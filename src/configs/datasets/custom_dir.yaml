@@ -1,0 +1,5 @@
+test:
+  _target_: src.datasets.CustomDirDataset
+  data_dir: data/sample
+  limit: null
+  instance_transforms: null

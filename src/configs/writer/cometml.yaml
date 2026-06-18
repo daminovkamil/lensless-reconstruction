@@ -1,0 +1,8 @@
+_target_: src.logger.CometMLWriter
+project_name: "hw5-lensless"
+workspace: null
+run_name: "noname"
+mode: "online"
+loss_names: ["loss", "mse_loss", "lpips_loss"]
+log_checkpoints: False
+id_length: 32

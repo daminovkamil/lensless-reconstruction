@@ -1,0 +1,18 @@
+train:
+  _target_: src.datasets.DigiCamDataset
+  repo_id: bezzam/DigiCam-Mirflickr-MultiMask-10K
+  split: train[:90%]
+  limit: null
+  instance_transforms: null
+val:
+  _target_: src.datasets.DigiCamDataset
+  repo_id: bezzam/DigiCam-Mirflickr-MultiMask-10K
+  split: train[90%:]
+  limit: null
+  instance_transforms: null
+test:
+  _target_: src.datasets.DigiCamDataset
+  repo_id: bezzam/DigiCam-Mirflickr-MultiMask-10K
+  split: test
+  limit: null
+  instance_transforms: null

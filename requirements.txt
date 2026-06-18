@@ -1,0 +1,35 @@
+# --- core (from project template) ---
+torch==2.2.0
+torchvision==0.17.0
+torchmetrics
+numpy==1.26.4
+tqdm
+matplotlib
+pandas
+Pillow
+hydra-core
+omegaconf
+
+# --- logging ---
+wandb
+comet_ml
+
+# --- lensless data + PSF simulation (required by lensless_helpers) ---
+opencv-python
+scipy
+rawpy               # load raw (.dng) captures in lensless_helpers.utils
+datasets            # HuggingFace DigiCam-Mirflickr-MultiMask-10K
+huggingface_hub
+waveprop @ git+https://github.com/ebezzam/waveprop.git
+slm_controller @ git+https://github.com/ebezzam/slm-controller.git
+
+# --- metrics / loss ---
+lpips               # LPIPS (VGG variant) for loss + metric
+
+# --- demo (Colab) ---
+gdown               # download dataset .zip / checkpoints from Google Drive
+
+# --- dev tooling ---
+black
+isort
+pre-commit

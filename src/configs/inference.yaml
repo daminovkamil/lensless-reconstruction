@@ -1,0 +1,13 @@
+defaults:
+  - model: pre4_u5_post4
+  - metrics: lensless
+  - datasets: custom_dir
+  - dataloader: base
+  - transforms: none
+  - _self_
+inferencer:
+  device_tensors: ["lensless", "psf"]
+  device: auto
+  save_path: "reconstructions"
+  seed: 1
+  from_pretrained: "saved/model_best.pth"
