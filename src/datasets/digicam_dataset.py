@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 from huggingface_hub import hf_hub_download
 
@@ -17,7 +19,8 @@ class DigiCamDataset(BaseDataset):
         instance_transforms=None,
     ):
         self.repo_id = repo_id
-        self.hf_dataset = load_dataset(repo_id, split=split)
+        self.hf_token = self._get_hf_token()
+        self.hf_dataset = load_dataset(repo_id, split=split, token=self.hf_token)
         self._psf_cache = {}
 
         mask_labels = self.hf_dataset["mask_label"]
@@ -44,11 +47,22 @@ class DigiCamDataset(BaseDataset):
     def _get_psf(self, mask_label):
         if mask_label not in self._psf_cache:
             mask_path = hf_hub_download(
-                self.repo_id, f"masks/mask_{mask_label}.npy", repo_type="dataset"
+                self.repo_id,
+                f"masks/mask_{mask_label}.npy",
+                repo_type="dataset",
+                token=self.hf_token,
             )
             psf = simulate_psf_from_mask(np.load(mask_path))
             self._psf_cache[mask_label] = psf[0].float()
         return self._psf_cache[mask_label]
+
+    @staticmethod
+    def _get_hf_token():
+        return (
+            os.environ.get("HF_TOKEN")
+            or os.environ.get("HUGGING_FACE_TOKEN")
+            or os.environ.get("HUGGING_FACE_HUB_TOKEN")
+        )
 
     @staticmethod
     def _assert_index_is_valid(index):
