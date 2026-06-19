@@ -15,9 +15,11 @@ and [Bezzam et al. 2025](https://arxiv.org/abs/2502.01102).
 | **pre+U5+post** | 4M DRUNet pre + 5-iter ADMM + 4M DRUNet post | ~8M |
 | **pre+U5** | 8M DRUNet pre + 5-iter ADMM | ~8M |
 | **U5+post** | 5-iter ADMM + 8M DRUNet post | ~8M |
+| **FISTA pre+post** | 4M DRUNet pre + 5-iter learned FISTA + 4M DRUNet post | ~8M |
 
 All ADMM variants share one implementation (`src/model/admm.py`). The modular wrappers
-live in `src/model/modular.py`; DRUNet in `src/model/drunet.py`.
+live in `src/model/modular.py`; DRUNet in `src/model/drunet.py`. The bonus FISTA
+inverter lives in `src/model/fista.py`.
 
 ---
 
@@ -64,6 +66,9 @@ python train.py model=pre8_u5
 
 # Modular: U5 + post(8M)
 python train.py model=u5_post8
+
+# Bonus: pre(4M) + learned FISTA-5 + post(4M)
+python train.py model=le_fista5_prepost
 ```
 
 All configs are Hydra-based (`src/configs/`). Key overrides:
@@ -97,6 +102,16 @@ Hosted checkpoints:
 | `daminovkamil/lensless-reconstruction` | `u5_post8.pth` | U5+post |
 | `daminovkamil/lensless-reconstruction` | `admm.pth` | Le-ADMM-20 |
 | `daminovkamil/lensless-reconstruction` | `admm100.pth` | ADMM-100 |
+| `daminovkamil/lensless-reconstruction` | `fista_prepost5.pth` | FISTA pre+post |
+
+Example for the bonus FISTA checkpoint:
+
+```bash
+python inference.py \
+  inferencer.from_pretrained=daminovkamil/lensless-reconstruction \
+  inferencer.pretrained_filename=fista_prepost5.pth \
+  datasets.test.data_dir=demo_sample
+```
 
 ---
 
@@ -146,5 +161,6 @@ All metrics on the **test split**, computed on the ROI.
 | pre+U5 | 21 | 14.29 | 0.279 | 0.0381 | 0.652 |
 | U5+post | 48 | 15.30 | 0.385 | 0.0304 | 0.581 |
 | **pre+U5+post** | **37** | **16.47** | **0.463** | **0.0233** | **0.537** |
+| FISTA pre+post | 10 | 15.41 | 0.387 | 0.0292 | 0.593 |
 
 ---
