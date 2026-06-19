@@ -20,8 +20,9 @@ scipy
 rawpy               # load raw (.dng) captures in lensless_helpers.utils
 datasets            # HuggingFace DigiCam-Mirflickr-MultiMask-10K
 huggingface_hub
-waveprop @ git+https://github.com/ebezzam/waveprop.git
-slm_controller @ git+https://github.com/ebezzam/slm-controller.git
+
+waveprop @ https://github.com/ebezzam/waveprop/archive/84c3e7dd50c7193e4c069a7581740ecbf33a3167.zip
+slm_controller @ https://github.com/ebezzam/slm-controller/archive/7fa4ffac3bdb9fae316f66f4ac9517806ae010ef.zip
 
 # --- metrics / loss ---
 lpips               # LPIPS (VGG variant) for loss + metric

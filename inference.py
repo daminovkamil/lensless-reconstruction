@@ -36,7 +36,11 @@ def main(config):
 
     source = config.inferencer.get("from_pretrained")
     if source is not None:
-        model = BaseModel.from_pretrained(source, map_location=device)
+        model = BaseModel.from_pretrained(
+            source,
+            filename=config.inferencer.get("pretrained_filename", "model_best.pth"),
+            map_location=device,
+        )
     else:
         model = instantiate(config.model).to(device)
     print(model)

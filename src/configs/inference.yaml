@@ -11,3 +11,4 @@ inferencer:
   save_path: "reconstructions"
   seed: 1
   from_pretrained: "saved/model_best.pth"
+  pretrained_filename: "model_best.pth"
