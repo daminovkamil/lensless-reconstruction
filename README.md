@@ -82,13 +82,21 @@ or W&B (`writer=wandb`).
 ```bash
 python inference.py \
   inferencer.from_pretrained=daminovkamil/lensless-reconstruction \
+  inferencer.pretrained_filename=model_best.pth \
   datasets.test.data_dir=demo_sample
 ```
 
-`inferencer.from_pretrained` accepts a HuggingFace repo id, a local run directory, or a
-`.pth` file — the architecture is read from the checkpoint, so no `model=` is needed.
-Reconstructions are saved under `data/saved/reconstructions/<partition>/<ImageID>.png`
-(the partition is the dataset split name, e.g. `test/` for `CustomDirDataset`).
+Reconstructions are saved to `data/saved/reconstructions/<partition>/<ImageID>.png`.
+
+Hosted checkpoints:
+
+| HuggingFace repo | File | Model |
+|---|---|---|
+| `daminovkamil/lensless-reconstruction` | `model_best.pth` | best model (pre+U5+post) |
+| `daminovkamil/lensless-reconstruction` | `pre4_u5_post4.pth` | pre+U5+post |
+| `daminovkamil/lensless-reconstruction` | `u5_post8.pth` | U5+post |
+| `daminovkamil/lensless-reconstruction` | `admm.pth` | Le-ADMM-20 |
+| `daminovkamil/lensless-reconstruction` | `admm100.pth` | ADMM-100 |
 
 ---
 
