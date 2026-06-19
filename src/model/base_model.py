@@ -1,10 +1,13 @@
 import os
+from pathlib import Path
 
 import torch
 from huggingface_hub import hf_hub_download
 from hydra.utils import instantiate
 from omegaconf import OmegaConf
 from torch import nn
+
+from src.utils.io_utils import ROOT_PATH
 
 
 class BaseModel(nn.Module):
@@ -13,11 +16,23 @@ class BaseModel(nn.Module):
     @classmethod
     def from_pretrained(cls, source, filename="model_best.pth", map_location="cpu"):
         """Load from a local file/dir or HuggingFace repo id; architecture is read from the checkpoint config."""
-        if os.path.isfile(source):
-            ckpt_path = source
-        elif os.path.isdir(source):
-            ckpt_path = os.path.join(source, filename)
-        else:
+        source_path = Path(os.path.expanduser(os.fspath(source)))
+        local_candidates = [source_path]
+        if not source_path.is_absolute():
+            local_candidates.append(ROOT_PATH / source_path)
+
+        ckpt_path = None
+        for candidate in local_candidates:
+            if candidate.is_file():
+                ckpt_path = candidate
+                break
+            if candidate.is_dir():
+                ckpt_path = candidate / filename
+                break
+
+        if ckpt_path is None:
+            if source_path.suffix in {".pth", ".pt", ".ckpt"}:
+                raise FileNotFoundError(f"Checkpoint not found: {source}")
             ckpt_path = hf_hub_download(repo_id=source, filename=filename)
 
         checkpoint = torch.load(

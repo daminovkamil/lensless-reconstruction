@@ -6,9 +6,9 @@ defaults:
   - transforms: none
   - _self_
 inferencer:
-  device_tensors: ["lensless", "psf"]
+  device_tensors: ["lensless", "psf", "gt"]
   device: auto
   save_path: "reconstructions"
   seed: 1
-  from_pretrained: "saved/model_best.pth"
+  from_pretrained: "daminovkamil/lensless-reconstruction"
   pretrained_filename: "model_best.pth"

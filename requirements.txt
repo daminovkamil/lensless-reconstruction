@@ -1,8 +1,8 @@
-# --- core (from project template) ---
-torch==2.2.0
-torchvision==0.17.0
+# --- core ---
+torch
+torchvision
 torchmetrics
-numpy==1.26.4
+numpy
 tqdm
 matplotlib
 pandas
@@ -29,8 +29,3 @@ lpips               # LPIPS (VGG variant) for loss + metric
 
 # --- demo (Colab) ---
 gdown               # download dataset .zip / checkpoints from Google Drive
-
-# --- dev tooling ---
-black
-isort
-pre-commit

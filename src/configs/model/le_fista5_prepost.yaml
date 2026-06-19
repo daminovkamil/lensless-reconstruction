@@ -1,0 +1,21 @@
+_target_: src.model.ModularReconstruction
+camera_inverter:
+  _target_: src.model.FISTAReconstruction
+  n_iters: 5
+  learnable: true
+  tv_weight: 2.0e-4
+  prox_iters: 5
+  step_scale: 0.95
+  eps: 1.0e-8
+pre_processor:
+  _target_: src.model.DRUNet
+  channels: [32, 64, 116, 128]
+  in_channels: 3
+  out_channels: 3
+  n_blocks: 4
+post_processor:
+  _target_: src.model.DRUNet
+  channels: [32, 64, 116, 128]
+  in_channels: 3
+  out_channels: 3
+  n_blocks: 4

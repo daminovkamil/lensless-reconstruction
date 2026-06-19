@@ -1,0 +1,6 @@
+_target_: src.model.FISTAReconstruction
+n_iters: 100
+tv_weight: 2.0e-4
+prox_iters: 25
+step_scale: 0.95
+eps: 1.0e-8
