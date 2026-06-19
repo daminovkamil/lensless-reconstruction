@@ -86,10 +86,10 @@ class Trainer(BaseTrainer):
         if mode != "train":
             self._log_reconstructions(batch, mode)
 
-    def _log_reconstructions(self, batch, mode, examples=8):
+    def _log_reconstructions(self, batch, mode):
         recon = crop_roi(batch["reconstructed"]).detach().cpu().clamp(0, 1)
         gt = crop_roi(batch["gt"]).detach().cpu().clamp(0, 1)
-        n = min(examples, recon.shape[0])
+        n = min(int(self.config.trainer.get("log_grid_images", 8)), recon.shape[0])
 
         pairs = [torch.cat([recon[i], gt[i]], dim=1) for i in range(n)]
         grid = (torch.cat(pairs, dim=0) * 255).to(torch.uint8).numpy()

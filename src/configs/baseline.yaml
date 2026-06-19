@@ -28,6 +28,7 @@ trainer:
   device: auto
   compile: false
   log_eval_images: 16
+  log_grid_images: 8
   override: False
   monitor: "max val_PSNR"
   save_period: 5
