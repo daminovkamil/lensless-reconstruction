@@ -5,6 +5,7 @@ import torch
 from hydra.utils import instantiate
 
 from src.datasets.data_utils import get_dataloaders
+from src.model import BaseModel
 from src.trainer import Inferencer
 from src.utils.init_utils import set_random_seed
 from src.utils.io_utils import ROOT_PATH
@@ -33,8 +34,11 @@ def main(config):
     # batch_transforms should be put on device
     dataloaders, batch_transforms = get_dataloaders(config, device)
 
-    # build model architecture, then print to console
-    model = instantiate(config.model).to(device)
+    source = config.inferencer.get("from_pretrained")
+    if source is not None:
+        model = BaseModel.from_pretrained(source, map_location=device)
+    else:
+        model = instantiate(config.model).to(device)
     print(model)
 
     # get metrics
@@ -52,7 +56,7 @@ def main(config):
         batch_transforms=batch_transforms,
         save_path=save_path,
         metrics=metrics,
-        skip_model_load=False,
+        skip_model_load=True,
     )
 
     logs = inferencer.run_inference()
