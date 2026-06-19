@@ -12,10 +12,6 @@ def soft_threshold(x, thresh):
     return x.sign() * (x.abs() - thresh).clamp_min(0.0)
 
 
-def _inv_softplus(y):
-    return math.log(math.expm1(y))
-
-
 class LenslessOperators:
     def __init__(self, psf):
         h, w = psf.shape[-2:]
@@ -69,20 +65,23 @@ class LenslessOperators:
 
 
 class UnrolledADMM(BaseModel):
-    def __init__(self, n_iters=20, learnable=True, mu_init=1e-4, tau_init=2e-4):
+    def __init__(self, n_iters, learnable, mu_init, tau_init):
         super().__init__()
         self.n_iters = n_iters
         self.learnable = learnable
 
         if learnable:
-            self.raw_mu1 = nn.Parameter(torch.full((n_iters,), _inv_softplus(mu_init)))
-            self.raw_mu2 = nn.Parameter(torch.full((n_iters,), _inv_softplus(mu_init)))
-            self.raw_mu3 = nn.Parameter(torch.full((n_iters,), _inv_softplus(mu_init)))
-            self.raw_tau = nn.Parameter(torch.full((n_iters,), _inv_softplus(tau_init)))
+            raw_mu_init = math.log(math.expm1(mu_init))
+            raw_tau_init = math.log(math.expm1(tau_init))
+
+            self.raw_mu1 = nn.Parameter(torch.full((n_iters,), raw_mu_init))
+            self.raw_mu2 = nn.Parameter(torch.full((n_iters,), raw_mu_init))
+            self.raw_mu3 = nn.Parameter(torch.full((n_iters,), raw_mu_init))
+            self.raw_tau = nn.Parameter(torch.full((n_iters,), raw_tau_init))
         else:
             self.mu_init, self.tau_init = mu_init, tau_init
 
-    def _hyper(self, k):
+    def _iteration_params(self, k):
         if self.learnable:
             return (
                 F.softplus(self.raw_mu1[k]),
@@ -104,7 +103,7 @@ class UnrolledADMM(BaseModel):
         a3 = torch.zeros_like(x)
 
         for k in range(self.n_iters):
-            mu1, mu2, mu3, tau = self._hyper(k)
+            mu1, mu2, mu3, tau = self._iteration_params(k)
 
             u = soft_threshold(Psix + a2 / mu2, tau / mu2)
             v = (a1 + mu1 * Hx + ctb) / (ops.ctc + mu1)

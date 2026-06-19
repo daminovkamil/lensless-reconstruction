@@ -8,4 +8,7 @@ camera_inverter:
 pre_processor:
   _target_: src.model.DRUNet
   channels: [32, 64, 128, 256]
+  in_channels: 3
+  out_channels: 3
+  n_blocks: 4
 post_processor: null

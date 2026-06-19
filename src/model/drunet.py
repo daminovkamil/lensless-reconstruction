@@ -38,9 +38,9 @@ class DRUNet(BaseModel):
     def __init__(
         self,
         channels: Sequence[int],
-        in_channels: int = 3,
-        out_channels: int = 3,
-        n_blocks: int = 4,
+        in_channels: int,
+        out_channels: int,
+        n_blocks: int,
     ):
         super().__init__()
         channels = list(channels)
